@@ -18,6 +18,10 @@ sha256sums=('4504b0df2d9ccfcf15b4d0c80664e216dc1170a4f8caeca46e79b93ff47e5e87'
 
 build() {
     cd ${pkgname}-${pkgver}
+
+	# add llvm mingw bin to path
+    export PATH="/opt/llvm-mingw/llvm-mingw-ucrt/bin:$PATH"
+    
 	# we know this will be running on a pipa
 	march="armv8.2-a+crypto+crc" 
 	mtune="cortex-a77"
