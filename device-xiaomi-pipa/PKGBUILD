@@ -9,7 +9,7 @@ depends=(
 	'bootmac'
 	'hexagonrpcd'
 	'pipa-kernel-hooks'
-	'linux-pipa'
+	'linux'
 	'mesa'
 	'mkbootimg'
 	'qbootctl'
