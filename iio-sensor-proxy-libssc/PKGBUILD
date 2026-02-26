@@ -29,7 +29,6 @@ source=(
 	"0006-data-iio-sensor-proxy.service.in-add-AF_QIPCRTR.patch"
 	"0007-drv-ssc-implement-set_polling.patch"
 	"0008-tests-integration-test-add-SSC-sensors.patch"
-	"0009-CI-add-libssc-build.patch"
 	"0010-ssc-Simplify-sensor-handling.patch"
 	"0001-WIP-iio-sensor-proxy.c-Do-not-exit-based-on-sensor-e.patch"
 	"0013-integration-test-add-test-for-sensors-that-report-no.patch"
@@ -46,7 +45,6 @@ sha512sums=(
   'cb66a401478b03afd85d0bbcd5f71fccadeb1a7f42c58d5fb8d7cfa852aefdf75d30c8b9f05eef1dfaffa26076618d94791d59be3aecff9c617dc1ce76dc0062'
   'd0ff2da84fbdb513bd3ff3688292243247df7302ae34c1aea3158201034acf32aea8cf9b2df784a2f85dd8e5c3631ac8d25c99f3aa0b1a76b39882695633bd6f'
   'ad69800ee5b4c11cf349b0920aaa02e7cee9711929d980b46d8f56da801c1f7a791ed3212ad0ac0f24f7d2900c82e8040ed9fa2778a7169562fd00599ed5287c'
-  'd1e88b382fb62fb1a5b28c1e2fae7cdeaab8cce9fcdc20400a596cb7e273c5e162d04fa5a5ed4abb1684eaa8f281b0f9658f713402a24271d7af910ac9dd62f9'
   '39fd54fab1ffe3d1abf61f5fa8c64f9983ab4fa527951f43dc59c96fa49007a039a3a5ff40a91e6c5a8c048f1ab47c60b292abccae4f86b5b5691e0eb25d61f5'
   '4b43ea53b71c9be29367897a3c9ba349e9fdb71185300aafc00be69f923d7f27aa02bb7f0f5c5be800f0d494035992e046c010fd70a1754f8a47701b17666926'
   '9273f01d35e0f45ddc943808326d87f3a2e678ea29e607d3d70cabc9ea321db761cc170a86b3093553a4c3dfae1d81c5057d146b9a90ff490c85641f02b040df'
@@ -66,11 +64,11 @@ prepare() {
 build() {
   mkdir $_pkgname-$pkgver/build
   cd $_pkgname-$pkgver/build
-
+  export PKG_CONFIG_PATH="/usr/lib64/pkgconfig:${PKG_CONFIG_PATH}"
   arch-meson .. \
     -Dsystemdsystemunitdir=/usr/lib/systemd/system \
     -Db_lto=true \
-		-Dssc-support=enabled
+	-Dssc-support=enabled
 
   ninja
 }
