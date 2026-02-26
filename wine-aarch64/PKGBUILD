@@ -1,0 +1,161 @@
+pkgname=wine-aarch64
+pkgver=hangover.11.0.r0.gf6816331a2c
+pkgrel=1
+source=(
+  "git+https://github.com/AndreRH/wine.git"
+  30-win32-aliases.conf
+  wine-binfmt.conf
+)
+
+sha256sums=(
+  'SKIP'
+  '9901a5ee619f24662b241672a7358364617227937d5f6d3126f70528ee5111e7'
+  '6dfdefec305024ca11f35ad7536565f5551f09119dda2028f194aee8f77077a4'
+)
+
+pkgdesc="Hangover Wine build"
+url="https://github.com/maakiopus/PKGBUILDs-pipa"
+arch=(aarch64)
+options=(!lto)
+license=(LGPL-2.1-or-later)
+depends=(
+  desktop-file-utils
+  fontconfig
+  freetype2
+  gcc-libs
+  gettext
+  libxcursor
+  libxkbcommon
+  libxi
+  libxrandr
+  wayland
+  ffmpeg
+  unixodbc
+)
+makedepends=(
+  git
+  alsa-lib
+  gnutls
+  gst-plugins-base-libs
+  libpulse
+  libxcomposite
+  mesa
+  opencl-headers
+  opencl-icd-loader
+  sdl2
+  vulkan-headers
+  vulkan-icd-loader
+  llvm-mingw-w64-toolchain
+  "linux-api-headers>=6.14"
+)
+optdepends=(
+  alsa-lib
+  alsa-plugins
+  gnutls
+  gst-plugins-bad
+  gst-plugins-base
+  gst-plugins-base-libs
+  gst-plugins-good
+  gst-plugins-ugly
+  libpulse
+  libxcomposite
+  opencl-icd-loader
+  sdl2
+  wine-gecko
+  wine-mono
+)
+provides=("wine-staging" "wine" "wine-wow64" "wine=${pkgver%.r*}")
+conflicts=("wine")
+install=wine.install
+
+pkgver() {
+  git -C wine describe --long --tags | sed 's/\([^-]*-g\)/r\1/;s/-/./g;s/^wine.//;s/^v//;s/\.rc/rc/'
+}
+
+prepare() {
+  # Get rid of old build dirs
+  rm -rf "$pkgname-build"
+  mkdir "$pkgname-build"
+
+  cd wine
+
+#   # apply wine-staging patchset
+#   ../wine-staging/staging/patchinstall.py --backend=git-apply --all \
+#     -W server-Signal_Thread
+# 
+#   ./dlls/winevulkan/make_vulkan
+#   ./tools/make_requests
+#   ./tools/make_specfiles
+#   autoreconf -f
+}
+
+build() {
+  local -a split=($CFLAGS)
+  local -A flags
+  for opt in "${split[@]}"; do flags["${opt%%=*}"]="${opt##*=}"; done
+  local march="${flags["-march"]:-"armv8.2-a+crypto+crc"}"
+  local mtune="${flags["-mtune"]:-"cortex-a77"}"
+
+  # add llvm mingw bin to path
+  export PATH="/opt/llvm-mingw/llvm-mingw-ucrt/bin:$PATH"
+
+  # Native Linux/ARM64 compiler and flags
+  export CC="clang"
+  export CXX="clang++"
+  export CFLAGS="-O2 -march=$march -mtune=$mtune -fwrapv -pipe -v"
+  export LDFLAGS="-Wl,-O1,--sort-common,--as-needed -fuse-ld=lld -v"
+
+  # Cross-compiler (Windows PE) flags
+  export CROSSCFLAGS="-O2 -fwrapv -pipe"
+  export CROSSCXXFLAGS="$CROSSCFLAGS"
+  export CROSSLDFLAGS="-Wl,/FILEALIGN:4096,/OPT:REF,/OPT:ICF"
+  
+  cd "$pkgname-build"
+  ../wine/configure \
+    --disable-tests \
+    --prefix=/usr \
+    --libdir=/usr/lib \
+    --with-x \
+    --with-wayland \
+    --with-gstreamer \
+    --with-ffmpeg \
+    --without-oss \
+    --without-sane \
+    --without-v4l2 \
+    --without-cups \
+    --without-gphoto \
+    --without-xinerama \
+    --without-pcsclite \
+    --without-xxf86vm \
+    --without-pcap \
+    --with-mingw=clang \
+	--enable-archs=arm64ec,aarch64,x86_64,i386
+	
+  make
+}
+
+package() {
+  cd "$pkgname-build"
+  make prefix="$pkgdir/usr" \
+    libdir="$pkgdir/usr/lib" \
+    dlldir="$pkgdir/usr/lib/wine" install
+
+  # Symlink for comptability with older scripts such as winetricks/setup_dxvk
+  ln -sf /usr/bin/wine "$pkgdir"/usr/bin/wine64
+
+  # Strip Windows binaries
+  llvm-strip --strip-unneeded "$pkgdir"/usr/lib/wine/aarch64-windows/*.{dll,exe}
+  llvm-strip --strip-unneeded "$pkgdir"/usr/lib/wine/i386-windows/*.{dll,exe}
+  llvm-strip --strip-unneeded "$pkgdir"/usr/lib/wine/x86_64-windows/*.{dll,exe}
+
+  # Font aliasing settings for Win32 applications
+  install -d "$pkgdir"/usr/share/fontconfig/conf.{avail,default}
+  install -m644 "$srcdir/30-win32-aliases.conf" "$pkgdir/usr/share/fontconfig/conf.avail"
+  ln -s ../conf.avail/30-win32-aliases.conf "$pkgdir/usr/share/fontconfig/conf.default/30-win32-aliases.conf"
+  install -Dm 644 "$srcdir/wine-binfmt.conf" "$pkgdir/usr/lib/binfmt.d/wine.conf"
+
+  # NTSync additions
+  echo "ntsync" | install -Dm644 /dev/stdin "$pkgdir/usr/lib/modules-load.d/wine-pure.conf"
+}
+
+# vim:set ts=8 sts=2 sw=2 et:
