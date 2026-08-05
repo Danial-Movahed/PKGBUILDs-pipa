@@ -61,7 +61,8 @@ jobs:
             libqmi protobuf-c gobject-introspection libqrtr-glib \
             libgudev polkit \
             nspr nss \
-            libical bc
+            libical bc \
+            ell
 
       - name: Create unprivileged build user
         run: |
