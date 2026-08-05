@@ -35,16 +35,20 @@ jobs:
       options: --privileged
 
     name: build packages and push repo
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       
-      - name: Checkout dist
+      - name: Checkout pipa-alarm
         uses: actions/checkout@v4
         with:
           repository: Danial-Movahed/pipa-alarm
-          path: dist
+          path: pipa-alarm
+        
+      - name: Move dist from pipa-alarm
+        run: |
+          mv pipa-alarm/dist .
+          rm -rf pipa-alarm
 
       - name: Install build deps
         run: |
