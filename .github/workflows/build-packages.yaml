@@ -62,9 +62,6 @@ jobs:
             libgudev polkit \
             nspr nss \
             libical bc
-          ls
-          ls dist
-          pwd
 
       - name: Create unprivileged build user
         run: |
