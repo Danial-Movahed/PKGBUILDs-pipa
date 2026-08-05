@@ -76,11 +76,11 @@ jobs:
             swclock-offset
             widevine
             wine-aarch64
+            firmware-xiaomi-pipa
             linux-pipa
             linux-pipa-dev
             mkbootimg-pipa
             pipa-kernel-hooks
-            firmware-xiaomi-pipa
             device-xiaomi-pipa
           )
           mkdir -p /dist
