@@ -83,7 +83,7 @@ jobs:
             # pipa-kernel-hooks
             # device-xiaomi-pipa
           )
-          mkdir -p /dist
+          mkdir -p $GITHUB_WORKSPACE/dist
           for pkg in "${pkgs[@]}"; do
             if [ ! -d "$GITHUB_WORKSPACE/$pkg" ]; then
               echo "WARNING: $pkg not found, skipping"
@@ -94,7 +94,7 @@ jobs:
             if sudo -u builder bash -c "makepkg -f --noconfirm --nodeps 2>&1"; then
               pkgfiles=$(ls *.pkg.tar.* 2>/dev/null)
               if [ -n "$pkgfiles" ]; then
-                cp $pkgfiles /dist/
+                cp $pkgfiles $GITHUB_WORKSPACE/dist/
                 # Install into container so subsequent packages can depend on it
                 pacman -U --noconfirm --nodeps $pkgfiles 2>/dev/null || true
               fi
@@ -114,7 +114,7 @@ jobs:
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
-          source-directory: /dist
+          source-directory: $GITHUB_WORKSPACE/dist
           destination-github-username: 'Danial-Movahed'
           destination-repository-name: 'pipa-alarm'
           user-email: movaheddanial@gmail.com
