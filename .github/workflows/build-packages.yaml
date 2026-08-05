@@ -1,0 +1,183 @@
+name: Build packages + update pacman repo
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'bluez-git/**'
+      - 'bootmac/**'
+      - 'box64/**'
+      - 'device-xiaomi-pipa/**'
+      - 'firmware-xiaomi-pipa/**'
+      - 'gamescope/**'
+      - 'hexagonrpcd/**'
+      - 'iio-sensor-proxy-libssc/**'
+      - 'libssc/**'
+      - 'linux-pipa/**'
+      - 'linux-pipa-dev/**'
+      - 'mangohud-git/**'
+      - 'mkbootimg-pipa/**'
+      - 'pipa-kernel-hooks/**'
+      - 'qbootctl/**'
+      - 'swclock-offset/**'
+      - 'widevine/**'
+      - 'wine-aarch64/**'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    container:
+      image: menci/archlinuxarm:base-devel
+      options: --privileged
+
+    name: build packages
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build deps
+        run: |
+          pacman -Syu --noconfirm --overwrite '*'
+          # Install standard packages from ALARM repos (always available)
+          pacman -S --noconfirm --needed --overwrite '*' \
+            git meson ninja cmake cython \
+            python python-setuptools python-build python-installer python-wheel squashfs-tools \
+            bluez bluez-libs bluez-utils \
+            libqmi protobuf-c gobject-introspection libqrtr-glib \
+            libgudev polkit \
+            nspr nss
+          }
+
+      - name: Create unprivileged build user
+        run: |
+          useradd -m builder
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+
+      - name: Build packages
+        run: |
+          failed=()
+          # Build order matters: deps before dependents
+          pkgs=(
+            libssc
+            iio-sensor-proxy-libssc
+            hexagonrpcd
+            bluez-git
+            bootmac
+            device-xiaomi-pipa
+            firmware-xiaomi-pipa
+            mkbootimg-pipa
+            pipa-kernel-hooks
+            linux-pipa
+            linux-pipa-dev
+            qbootctl
+            box64
+            gamescope
+            mangohud-git
+            swclock-offset
+            widevine
+            wine-aarch64
+          )
+          mkdir -p /dist
+          for pkg in "${pkgs[@]}"; do
+            if [ ! -d "$GITHUB_WORKSPACE/$pkg" ]; then
+              echo "WARNING: $pkg not found, skipping"
+              continue
+            fi
+            echo "==> Building $pkg"
+            cd "$GITHUB_WORKSPACE/$pkg"
+            if sudo -u builder bash -c "makepkg -f --noconfirm --nodeps 2>&1"; then
+              pkgfiles=$(ls *.pkg.tar.* 2>/dev/null)
+              if [ -n "$pkgfiles" ]; then
+                cp $pkgfiles /dist/
+                # Install into container so subsequent packages can depend on it
+                pacman -U --noconfirm --nodeps $pkgfiles 2>/dev/null || true
+              fi
+              echo "OK: $pkg"
+            else
+              echo "FAILED: $pkg"
+              failed+=("$pkg")
+            fi
+            cd "$GITHUB_WORKSPACE"
+          done
+          if [ ${#failed[@]} -gt 0 ]; then
+            echo "::warning::Failed packages: ${failed[*]}"
+          fi
+
+      - name: Upload packages to repo
+        uses: XenonMolecule/github-action-push-to-another-repository@0.1.0
+        env:
+          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
+        with:
+          source-directory: /dist
+          destination-github-username: 'Danial-Movahed'
+          destination-repository-name: 'pipa-alarm'
+          user-email: movaheddanial@gmail.com
+          commit-message: See ORIGIN_COMMIT from $GITHUB_REF
+          target-branch: main
+
+  publish:
+    needs: build
+    runs-on: ubuntu-24.04-arm
+    container:
+      image: menci/archlinuxarm:base-devel
+
+    steps:
+      - name: Install repo tools
+        run: pacman -Syu --noconfirm --needed pacman
+      
+      - name: Download existing repo packages
+        uses: robinraju/release-downloader@v1
+        with:
+          repository: Danial-Movahed/pipa-alarm
+          tag: repo
+          out-file-path: dist
+          fileName: '*.pkg.tar.*'
+        continue-on-error: true
+
+      - name: Download existing repo db
+        uses: robinraju/release-downloader@v1
+        with:
+          repository: Danial-Movahed/pipa-alarm
+          tag: repo
+          out-file-path: dist
+          fileName: 'pipa-alarm.*'
+        continue-on-error: true
+
+      - name: Merge and rebuild repo database
+        run: |
+          mkdir -p dist
+          cd dist
+          repo-add pipa-alarm.db.tar.zst *.pkg.tar.*
+          rm -f pipa-alarm.db pipa-alarm.files
+          cp -f pipa-alarm.db.tar.zst pipa-alarm.db
+          cp -f pipa-alarm.files.tar.zst pipa-alarm.files
+
+      - name: Push db
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        env:
+          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
+        with:
+          source_file: 'dist/pipa-alarm.db'
+          destination_repo: 'Danial-Movahed/pipa-alarm'
+          destination_folder: 'dist'
+          user_email: 'movaheddanial@gmail.com'
+          user_name: 'Seyed Danial Movahed'
+          commit_message: 'Push new db'
+
+      - name: Push files
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        env:
+          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
+        with:
+          source_file: 'dist/pipa-alarm.files'
+          destination_repo: 'Danial-Movahed/pipa-alarm'
+          destination_folder: 'dist'
+          user_email: 'movaheddanial@gmail.com'
+          user_name: 'Seyed Danial Movahed'
+          commit_message: 'Push new db files'
