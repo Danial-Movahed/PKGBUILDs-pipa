@@ -17,7 +17,7 @@ source=("$url/archive/refs/heads/$_branch.tar.gz"
         'linux-pipa.preset'
         'cmdline.txt')
 sha512sums=('SKIP'
-         'b1545e2fab17a141d62b816beeaa45e1796f0aaa6be8c9ddf521e73f89bc75b9399d42ae4cd4ebe789f29510491ba109464b6a1187cc7df1f25ccaf9eaa01afc'
+         '4244a79ebf0361f20e327a2f2913287eb65df2c8afd0fff2170aeb5e4679e844e6f049259fb9f36c00b47413783073149369fb4b210bccbdc15aa10354ace5e8'
          '14ee951294ad6a4101cc3be9ee5fd2d1a70b000cb597ea9c992d8075cf27e7310e8cfd7d4aa82f9f718458c39e8b6cf764bdbc485b1d4fe48e66742330987acc'
          'ce27b573ede22f7a5a4b974f038e16f7fcc171e6dc801ac22aabb55d0e4ba736de0e8f7496fbde66276d1f5711f1dd70e114e47fb15536aa0ad3f5067c9cb73d')
 
