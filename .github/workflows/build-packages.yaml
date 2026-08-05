@@ -28,17 +28,23 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  build-push:
     runs-on: ubuntu-24.04-arm
     container:
       image: menci/archlinuxarm:base-devel
       options: --privileged
 
-    name: build packages
+    name: build packages and push repo
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      
+      - name: Checkout dist
+        uses: actions/checkout@v4
+        with:
+          repository: Danial-Movahed/pipa-alarm
+          path: dist
 
       - name: Install build deps
         run: |
@@ -108,6 +114,14 @@ jobs:
           if [ ${#failed[@]} -gt 0 ]; then
             echo "::warning::Failed packages: ${failed[*]}"
           fi
+      - name: Merge and rebuild repo database
+        run: |
+          mkdir -p dist
+          cd dist
+          repo-add pipa-alarm.db.tar.zst *.pkg.tar.*
+          rm -f pipa-alarm.db pipa-alarm.files
+          ln -s pipa-alarm.db.tar.zst pipa-alarm.db
+          ln -s pipa-alarm.files.tar.zst pipa-alarm.files
 
       - name: Upload packages to repo
         uses: cpina/github-action-push-to-another-repository@main
@@ -121,65 +135,3 @@ jobs:
           user-email: movaheddanial@gmail.com
           commit-message: See ORIGIN_COMMIT from $GITHUB_REF
           target-branch: main
-
-  publish:
-    needs: build
-    runs-on: ubuntu-24.04-arm
-    container:
-      image: menci/archlinuxarm:base-devel
-      options: --privileged
-
-    steps:
-      - name: Install repo tools
-        run: pacman -Syu --noconfirm --needed pacman
-      
-      - name: Download existing repo packages
-        uses: robinraju/release-downloader@v1
-        with:
-          repository: Danial-Movahed/pipa-alarm
-          tag: repo
-          out-file-path: dist
-          fileName: '*.pkg.tar.*'
-        continue-on-error: true
-
-      - name: Download existing repo db
-        uses: robinraju/release-downloader@v1
-        with:
-          repository: Danial-Movahed/pipa-alarm
-          tag: repo
-          out-file-path: dist
-          fileName: 'pipa-alarm.*'
-        continue-on-error: true
-
-      - name: Merge and rebuild repo database
-        run: |
-          mkdir -p dist
-          cd dist
-          repo-add pipa-alarm.db.tar.zst *.pkg.tar.*
-          rm -f pipa-alarm.db pipa-alarm.files
-          cp -f pipa-alarm.db.tar.zst pipa-alarm.db
-          cp -f pipa-alarm.files.tar.zst pipa-alarm.files
-
-      - name: Push db
-        uses: dmnemec/copy_file_to_another_repo_action@main
-        env:
-          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
-        with:
-          source_file: 'dist/pipa-alarm.db'
-          destination_repo: 'Danial-Movahed/pipa-alarm'
-          destination_folder: 'dist'
-          user_email: 'movaheddanial@gmail.com'
-          user_name: 'Seyed Danial Movahed'
-          commit_message: 'Push new db'
-
-      - name: Push files
-        uses: dmnemec/copy_file_to_another_repo_action@main
-        env:
-          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
-        with:
-          source_file: 'dist/pipa-alarm.files'
-          destination_repo: 'Danial-Movahed/pipa-alarm'
-          destination_folder: 'dist'
-          user_email: 'movaheddanial@gmail.com'
-          user_name: 'Seyed Danial Movahed'
-          commit_message: 'Push new db files'
