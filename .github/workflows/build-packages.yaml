@@ -50,7 +50,8 @@ jobs:
             bluez bluez-libs bluez-utils \
             libqmi protobuf-c gobject-introspection libqrtr-glib \
             libgudev polkit \
-            nspr nss
+            nspr nss \
+            libical bc
 
       - name: Create unprivileged build user
         run: |
@@ -68,12 +69,6 @@ jobs:
             hexagonrpcd
             bluez-git
             bootmac
-            device-xiaomi-pipa
-            firmware-xiaomi-pipa
-            mkbootimg-pipa
-            pipa-kernel-hooks
-            linux-pipa
-            linux-pipa-dev
             qbootctl
             box64
             gamescope
@@ -81,6 +76,12 @@ jobs:
             swclock-offset
             widevine
             wine-aarch64
+            linux-pipa
+            linux-pipa-dev
+            mkbootimg-pipa
+            pipa-kernel-hooks
+            firmware-xiaomi-pipa
+            device-xiaomi-pipa
           )
           mkdir -p /dist
           for pkg in "${pkgs[@]}"; do
