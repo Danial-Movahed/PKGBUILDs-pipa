@@ -76,22 +76,22 @@ jobs:
           pkgs=(
             libssc
             iio-sensor-proxy-libssc
-            # hexagonrpcd
-            # bluez-git
-            # bootmac
-            # qbootctl
-            # box64
-            # gamescope
-            # mangohud-git
-            # swclock-offset
-            # widevine
-            # wine-aarch64
-            # firmware-xiaomi-pipa
-            # linux-pipa
-            # linux-pipa-dev
-            # mkbootimg-pipa
-            # pipa-kernel-hooks
-            # device-xiaomi-pipa
+            hexagonrpcd
+            bluez-git
+            bootmac
+            qbootctl
+            box64
+            gamescope
+            mangohud-git
+            swclock-offset
+            widevine
+            wine-aarch64
+            firmware-xiaomi-pipa
+            linux-pipa
+            linux-pipa-dev
+            mkbootimg-pipa
+            pipa-kernel-hooks
+            device-xiaomi-pipa
           )
           mkdir -p $GITHUB_WORKSPACE/dist
           for pkg in "${pkgs[@]}"; do
