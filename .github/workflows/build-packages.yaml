@@ -114,7 +114,7 @@ jobs:
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
-          source-directory: $GITHUB_WORKSPACE/dist
+          source-directory: dist
           destination-github-username: 'Danial-Movahed'
           destination-repository-name: 'pipa-alarm'
           user-email: movaheddanial@gmail.com
