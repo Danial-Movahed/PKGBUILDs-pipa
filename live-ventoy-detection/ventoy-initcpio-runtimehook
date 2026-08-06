@@ -1,0 +1,18 @@
+#!/bin/bash
+
+run_hook() {
+    echo ":: Detecting ventoy ..."
+    chmod +x /usr/local/bin/vtoydump
+    if ! /usr/local/bin/vtoydump > /dev/null; then
+        echo ":: Ventoy not detected, continuing normal boot! ..."
+        exit 0
+    fi
+    echo ":: Ventoy detected! Mounting iso from ventoy ..."
+    mkdir /mntdisk
+    DISK=$(/usr/local/bin/vtoydump | grep name | awk -F': ' '{print $2}')
+    PART=$(/usr/local/bin/vtoydump | grep part | awk -F': ' '{print $2}')
+    PATH=$(/usr/local/bin/vtoydump | grep path | awk -F': ' '{print $2}')
+
+    mount ${DISK}${PART}  /mntdisk
+    mount /mntdisk${PATH} /run/archiso/bootmnt
+}
