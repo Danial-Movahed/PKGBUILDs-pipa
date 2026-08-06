@@ -45,6 +45,10 @@ package() {
 	mkdir -p "${pkgdir} /usr/share/alsa/ucm2/conf.d/sm8250/"
 	install -Dm644 "${srcdir}/xiaomi-pipa.conf" "${pkgdir}/usr/share/alsa/ucm2/conf.d/sm8250/Xiaomi Pad 6.conf"
 
+	# /usr/share/alsa/ucm2/conf.d/sm8250/Xiaomi-Pad6-pipa-M82.conf 
+	mkdir -p "${pkgdir} /usr/share/alsa/ucm2/conf.d/sm8250/"
+	install -Dm644 "${srcdir}/xiaomi-pipa.conf" "${pkgdir}/usr/share/alsa/ucm2/conf.d/sm8250/Xiaomi-Pad6-pipa-M82.conf"
+
 	# /usr/share/alsa/ucm2/Qualcomm/sm8250/HiFi_pipa.conf
 	mkdir -p "${pkgdir}/usr/share/alsa/ucm2/Qualcomm/sm8250/"
 	install -Dm644 "${srcdir}/hifi.conf" "${pkgdir}/usr/share/alsa/ucm2/Qualcomm/sm8250/HiFi_pipa.conf"
