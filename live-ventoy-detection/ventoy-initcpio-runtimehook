@@ -1,18 +1,33 @@
-#!/bin/bash
+#!/bin/sh
 
 run_hook() {
     echo ":: Detecting ventoy ..."
-    chmod +x /usr/local/bin/vtoydump
-    if ! /usr/local/bin/vtoydump > /dev/null; then
-        echo ":: Ventoy not detected, continuing normal boot! ..."
-        exit 0
-    fi
-    echo ":: Ventoy detected! Mounting iso from ventoy ..."
-    mkdir /mntdisk
-    DISK=$(/usr/local/bin/vtoydump | grep name | awk -F': ' '{print $2}')
-    PART=$(/usr/local/bin/vtoydump | grep part | awk -F': ' '{print $2}')
-    PATH=$(/usr/local/bin/vtoydump | grep path | awk -F': ' '{print $2}')
 
-    mount ${DISK}${PART}  /mntdisk
-    mount /mntdisk${PATH} /run/archiso/bootmnt
+    echo ":: Waiting at least 10 seconds ..."
+    sleep 10
+
+    echo ":: Waiting for udev ..."
+    # Wait to udev to fully settle in case of slow usb
+    udevadm trigger --action=add --subsystem-match=block
+    udevadm settle --timeout=10
+
+    chmod +x /usr/local/bin/vtoydump
+
+    if ! vtoydump; then
+        echo ":: Ventoy not detected, continuing normal boot! ..."
+        return 0
+    fi
+
+    echo ":: Ventoy detected! Mounting iso from ventoy ..."
+
+    local VTOY_DISK=$(vtoydump | grep name | awk -F': ' '{print $2}' | awk -v ORS="" '{gsub(/[[:space:]]/,"")}1')
+    local VTOY_PART=$(vtoydump | grep part | awk -F': ' '{print $2}' | awk -v ORS="" '{gsub(/[[:space:]]/,"")}1')
+    local VTOY_PATH=$(vtoydump | grep path | awk -F': ' '{print $2}' | awk -v ORS="" '{gsub(/[[:space:]]/,"")}1')
+
+    mkdir -p /run/archiso/bootmnt
+    mkdir -p /mntdisk
+
+    # Mount the physical Ventoy drive
+    mount "${VTOY_DISK}${VTOY_PART}" /mntdisk
+    mount -o loop "/mntdisk${VTOY_PATH}" /run/archiso/bootmnt
 }
