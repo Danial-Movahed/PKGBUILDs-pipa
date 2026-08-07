@@ -1,0 +1,140 @@
+name: Build packages except kernel + update pacman repo
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'bluez-git/**'
+      - 'bootmac/**'
+      - 'box64/**'
+      - 'device-xiaomi-pipa/**'
+      - 'firmware-xiaomi-pipa/**'
+      - 'gamescope/**'
+      - 'hexagonrpcd/**'
+      - 'iio-sensor-proxy-libssc/**'
+      - 'libssc/**'
+      - 'live-ventoy-detection/**'
+      - 'mangohud-git/**'
+      - 'mkbootimg-pipa/**'
+      - 'pipa-kernel-hooks/**'
+      - 'qbootctl/**'
+      - 'swclock-offset/**'
+      - 'widevine/**'
+      - 'wine-aarch64/**'
+
+permissions:
+  contents: write
+
+jobs:
+  build-push:
+    runs-on: ubuntu-24.04-arm
+    container:
+      image: menci/archlinuxarm:base-devel
+      options: --privileged
+
+    name: build packages and push repo
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Checkout pipa-alarm
+        uses: actions/checkout@v4
+        with:
+          repository: Danial-Movahed/pipa-alarm
+          path: pipa-alarm
+        
+      - name: Move dist from pipa-alarm
+        run: |
+          mv pipa-alarm/dist .
+          rm -rf pipa-alarm
+
+      - name: Install build deps
+        run: |
+          pacman -Syu --noconfirm --overwrite '*'
+          # Install standard packages from ALARM repos (always available)
+          pacman -S --noconfirm --needed --overwrite '*' \
+            git meson ninja cmake cython \
+            python python-setuptools python-build python-installer python-wheel squashfs-tools \
+            bluez bluez-libs bluez-utils \
+            libqmi protobuf-c gobject-introspection libqrtr-glib \
+            libgudev polkit \
+            nspr nss \
+            libical bc \
+            ell
+
+      - name: Create unprivileged build user
+        run: |
+          useradd -m builder
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+
+      - name: Build packages
+        run: |
+          failed=()
+          # Build order matters: deps before dependents
+          pkgs=(
+            live-ventoy-detection
+            libssc
+            iio-sensor-proxy-libssc
+            hexagonrpcd
+            bluez-git
+            bootmac
+            qbootctl
+            box64
+            gamescope
+            mangohud-git
+            swclock-offset
+            widevine
+            wine-aarch64
+            firmware-xiaomi-pipa
+            mkbootimg-pipa
+            pipa-kernel-hooks
+            device-xiaomi-pipa
+          )
+          mkdir -p $GITHUB_WORKSPACE/dist
+          for pkg in "${pkgs[@]}"; do
+            if [ ! -d "$GITHUB_WORKSPACE/$pkg" ]; then
+              echo "WARNING: $pkg not found, skipping"
+              continue
+            fi
+            echo "==> Building $pkg"
+            cd "$GITHUB_WORKSPACE/$pkg"
+            if sudo -u builder bash -c "makepkg -f --noconfirm --nodeps 2>&1"; then
+              pkgfiles=$(ls *.pkg.tar.* 2>/dev/null)
+              if [ -n "$pkgfiles" ]; then
+                cp $pkgfiles $GITHUB_WORKSPACE/dist/
+                # Install into container so subsequent packages can depend on it
+                pacman -U --noconfirm --nodeps $pkgfiles 2>/dev/null || true
+              fi
+              echo "OK: $pkg"
+            else
+              echo "FAILED: $pkg"
+              failed+=("$pkg")
+            fi
+            cd "$GITHUB_WORKSPACE"
+          done
+          if [ ${#failed[@]} -gt 0 ]; then
+            echo "::warning::Failed packages: ${failed[*]}"
+          fi
+      - name: Merge and rebuild repo database
+        run: |
+          mkdir -p dist
+          cd dist
+          repo-add pipa-alarm.db.tar.zst *.pkg.tar.*
+          rm -f pipa-alarm.db pipa-alarm.files
+          ln -s pipa-alarm.db.tar.zst pipa-alarm.db
+          ln -s pipa-alarm.files.tar.zst pipa-alarm.files
+
+      - name: Upload packages to repo
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source-directory: dist
+          target-directory: dist
+          destination-github-username: 'Danial-Movahed'
+          destination-repository-name: 'pipa-alarm'
+          user-email: movaheddanial@gmail.com
+          commit-message: See ORIGIN_COMMIT from $GITHUB_REF
+          target-branch: main

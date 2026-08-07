@@ -1,29 +1,12 @@
-name: Build packages + update pacman repo
+name: Build kernel packages + update pacman repo
 
 on:
   workflow_dispatch:
   push:
     branches: [main]
     paths:
-      - 'bluez-git/**'
-      - 'bootmac/**'
-      - 'box64/**'
-      - 'device-xiaomi-pipa/**'
-      - 'firmware-xiaomi-pipa/**'
-      - 'gamescope/**'
-      - 'hexagonrpcd/**'
-      - 'iio-sensor-proxy-libssc/**'
-      - 'libssc/**'
       - 'linux-pipa/**'
       - 'linux-pipa-dev/**'
-      - 'live-ventoy-detection/**'
-      - 'mangohud-git/**'
-      - 'mkbootimg-pipa/**'
-      - 'pipa-kernel-hooks/**'
-      - 'qbootctl/**'
-      - 'swclock-offset/**'
-      - 'widevine/**'
-      - 'wine-aarch64/**'
 
 permissions:
   contents: write
@@ -76,25 +59,8 @@ jobs:
           failed=()
           # Build order matters: deps before dependents
           pkgs=(
-            live-ventoy-detection
-            libssc
-            iio-sensor-proxy-libssc
-            hexagonrpcd
-            bluez-git
-            bootmac
-            qbootctl
-            box64
-            gamescope
-            mangohud-git
-            swclock-offset
-            widevine
-            wine-aarch64
-            firmware-xiaomi-pipa
             linux-pipa
             linux-pipa-dev
-            mkbootimg-pipa
-            pipa-kernel-hooks
-            device-xiaomi-pipa
           )
           mkdir -p $GITHUB_WORKSPACE/dist
           for pkg in "${pkgs[@]}"; do
