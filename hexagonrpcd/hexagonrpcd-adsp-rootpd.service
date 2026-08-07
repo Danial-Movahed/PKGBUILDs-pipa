@@ -3,6 +3,8 @@ Description=Hexagonrpcd ADSP RootPD Daemon to support Qualcomm Hexagon ADSP virt
 Requires=dev-fastrpc\x2dadsp.device
 After=dev-fastrpc\x2dadsp.device
 Before=iio-sensor-proxy.service
+# Ideally this should be removed once hexagonrpcd-adsp works on pipa, but for now when installing iio-sensor-proxy-libssc this service gets started which breaks audio after suspend, disabling it should fix it.
+ConditionPathExists=!/dev/fastrpc-sdsp
 
 [Service]
 User=fastrpc
