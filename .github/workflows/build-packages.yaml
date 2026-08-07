@@ -16,6 +16,7 @@ on:
       - 'libssc/**'
       - 'linux-pipa/**'
       - 'linux-pipa-dev/**'
+      - 'live-ventoy-detection/**'
       - 'mangohud-git/**'
       - 'mkbootimg-pipa/**'
       - 'pipa-kernel-hooks/**'
@@ -75,6 +76,7 @@ jobs:
           failed=()
           # Build order matters: deps before dependents
           pkgs=(
+            live-ventoy-detection
             libssc
             iio-sensor-proxy-libssc
             hexagonrpcd
