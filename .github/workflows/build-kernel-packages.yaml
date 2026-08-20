@@ -20,22 +20,6 @@ jobs:
 
     name: build packages and push repo
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-            submodules: true
-      
-      - name: Checkout pipa-alarm
-        uses: actions/checkout@v4
-        with:
-          repository: Danial-Movahed/pipa-alarm
-          path: pipa-alarm
-        
-      - name: Move dist from pipa-alarm
-        run: |
-          mv pipa-alarm/dist .
-          rm -rf pipa-alarm
-
       - name: Install build deps
         run: |
           pacman -Syu --noconfirm --overwrite '*'
@@ -49,6 +33,22 @@ jobs:
             nspr nss \
             libical bc \
             ell
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+            submodules: true
+
+      - name: Checkout pipa-alarm
+        uses: actions/checkout@v4
+        with:
+          repository: Danial-Movahed/pipa-alarm
+          path: pipa-alarm
+
+      - name: Move dist from pipa-alarm
+        run: |
+          mv pipa-alarm/dist .
+          rm -rf pipa-alarm
 
       - name: Create unprivileged build user
         run: |
