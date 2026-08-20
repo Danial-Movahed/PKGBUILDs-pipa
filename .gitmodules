@@ -1,3 +1,6 @@
 [submodule "box64"]
 	path = box64
 	url = https://aur.archlinux.org/box64
+[submodule "mangohud-git"]
+	path = mangohud-git
+	url = https://aur.archlinux.org/mangohud-git
