@@ -3,6 +3,8 @@ Description=Hexagonrpcd SDSP Daemon to support Qualcomm Hexagon SDSP virtual fil
 Requires=dev-fastrpc\x2dsdsp.device
 After=dev-fastrpc\x2dsdsp.device
 Before=iio-sensor-proxy.service
+# Fix for sensors crashing after suspend and resume
+Conflicts=sleep.target
 
 [Service]
 User=fastrpc
