@@ -72,7 +72,7 @@ jobs:
             fi
             echo "==> Building $pkg"
             cd "$GITHUB_WORKSPACE/$pkg"
-            if sudo -u builder bash -c "makepkg -f --noconfirm --nodeps 2>&1"; then
+            if sudo -u builder bash -c "makepkg -A -f --noconfirm --nodeps 2>&1"; then
               pkgfiles=$(ls *.pkg.tar.* 2>/dev/null)
               if [ -n "$pkgfiles" ]; then
                 cp $pkgfiles $GITHUB_WORKSPACE/dist/
