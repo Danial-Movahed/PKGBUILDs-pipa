@@ -9,7 +9,6 @@ on:
       - 'box64/**'
       - 'device-xiaomi-pipa/**'
       - 'firmware-xiaomi-pipa/**'
-      - 'gamescope/**'
       - 'hexagonrpcd/**'
       - 'iio-sensor-proxy-libssc/**'
       - 'libssc/**'
@@ -82,7 +81,6 @@ jobs:
             bootmac
             qbootctl
             box64
-            gamescope
             mangohud-git
             swclock-offset
             widevine
