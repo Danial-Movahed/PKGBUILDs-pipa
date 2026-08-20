@@ -1,0 +1,3 @@
+[submodule "box64"]
+	path = box64
+	url = https://aur.archlinux.org/box64
