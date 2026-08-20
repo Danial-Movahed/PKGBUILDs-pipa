@@ -6,7 +6,7 @@ pkgdesc="Configure MAC addresses at boot"
 arch=('any')
 url="https://gitlab.postmarketos.org/postmarketOS/bootmac"
 license=('GPL3')
-depends=('bluez-git')
+depends=('bluez')
 source=("https://gitlab.postmarketos.org/postmarketOS/bootmac/-/archive/v$pkgver/bootmac-v$pkgver.tar.gz")
 sha512sums=('1831fa7c7f1e485ee272bcc1ed800de51f368dc5a024e572b1e5d8a9085f7ac73bb05ad13f41d0691859b634625c76c810cda815eeb558f24e67884924532ad5')
 

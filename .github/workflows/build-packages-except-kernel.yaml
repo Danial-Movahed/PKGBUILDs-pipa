@@ -5,7 +5,6 @@ on:
   push:
     branches: [main]
     paths:
-      - 'bluez-git/**'
       - 'bootmac/**'
       - 'box64/**'
       - 'device-xiaomi-pipa/**'
@@ -78,7 +77,6 @@ jobs:
             libssc
             iio-sensor-proxy-libssc
             hexagonrpcd
-            bluez-git
             bootmac
             qbootctl
             box64
