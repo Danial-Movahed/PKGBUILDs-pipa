@@ -48,7 +48,7 @@ jobs:
             nspr nss \
             libical bc \
             ell \
-            libx11 libxrandr glslang cmocka appstream wayland wayland-protocols python-mako libxkbcommon-x11 libxkbcommon vulkan-headers eglexternalplatform egl-gbm egl-wayland egl-x11 
+            libx11 libxrandr glslang cmocka appstream wayland wayland-protocols python-mako libxkbcommon-x11 libxkbcommon vulkan-headers vulkan-icd-loader vulkan-tools eglexternalplatform egl-gbm egl-wayland egl-x11
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -124,6 +124,8 @@ jobs:
         run: |
           mkdir -p dist
           cd dist
+          # remove nvidia as it's not needed for pipa and it's only used in building mangohud
+          rm *nvidia*
           repo-add pipa-alarm.db.tar.zst *.pkg.tar.*
           rm -f pipa-alarm.db pipa-alarm.files
           ln -s pipa-alarm.db.tar.zst pipa-alarm.db
