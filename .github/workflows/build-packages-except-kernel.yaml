@@ -45,7 +45,8 @@ jobs:
             libgudev polkit \
             nspr nss \
             libical bc \
-            ell
+            ell \
+            libx11
 
       - name: Checkout
         uses: actions/checkout@v4
