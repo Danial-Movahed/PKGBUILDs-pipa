@@ -4,3 +4,9 @@
 [submodule "mangohud-git"]
 	path = mangohud-git
 	url = https://aur.archlinux.org/mangohud-git
+[submodule "nvidia-580xx-settings"]
+	path = nvidia-580xx-settings
+	url = https://aur.archlinux.org/nvidia-580xx-settings
+[submodule "nvidia-580xx-utils"]
+	path = nvidia-580xx-utils
+	url = https://aur.archlinux.org/nvidia-580xx-utils

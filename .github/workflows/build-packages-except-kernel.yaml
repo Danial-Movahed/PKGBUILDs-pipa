@@ -15,6 +15,8 @@ on:
       - 'live-ventoy-detection/**'
       - 'mangohud-git/**'
       - 'mkbootimg-pipa/**'
+      - 'nvidia-580xx-settings/**'
+      - 'nvidia-580xx-utils/**'
       - 'pipa-kernel-hooks/**'
       - 'qbootctl/**'
       - 'swclock-offset/**'
@@ -46,7 +48,7 @@ jobs:
             nspr nss \
             libical bc \
             ell \
-            libx11 wayland libxkbcommon-x11 libxkbcommon
+            libx11 libxrandr glslang cmocka appstream wayland wayland-protocols python-mako libxkbcommon-x11 libxkbcommon vulkan-headers eglexternalplatform egl-gbm egl-wayland egl-x11 
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -82,6 +84,8 @@ jobs:
             bootmac
             qbootctl
             box64
+            nvidia-580xx-utils
+            nvidia-580xx-settings
             mangohud-git
             swclock-offset
             widevine
