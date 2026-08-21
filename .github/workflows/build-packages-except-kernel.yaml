@@ -46,7 +46,7 @@ jobs:
             nspr nss \
             libical bc \
             ell \
-            libx11 wayland
+            libx11 wayland libxkbcommon-x11 libxkbcommon
 
       - name: Checkout
         uses: actions/checkout@v4
