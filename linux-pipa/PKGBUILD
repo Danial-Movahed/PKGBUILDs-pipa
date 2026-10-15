@@ -1,13 +1,13 @@
 buildarch=8
 pkgbase=linux-pipa
-_branch="pipa/7.1"
-_srcname="linux-pipa-7.1"
+_branch="pipa/7.1.7-Stable"
+_srcname="linux-pipa-7.1.7-stable"
 _kernelname=${pkgbase#linux}
 _desc="Kernel for Xiaomi Pad 6 (pipa)"
-pkgver=7.1.0
+pkgver=7.1.7
 pkgrel=0
 arch=('aarch64')
-url="https://github.com/PipaDB/linux"
+url="https://github.com/rmuxnet/linux-sm8250"
 license=('GPL2')
 makedepends=('xmlto' 'docbook-xsl' 'kmod' 'inetutils' 'bc' 'git' 'uboot-tools' 'dtc')
 options=('!strip')
@@ -48,7 +48,7 @@ build() {
 _package() {
   pkgdesc="The Linux Kernel and modules - ${_desc}"
   depends=(    
-  	'linux-firmware-pipa-adreno'
+    'linux-firmware-pipa-adreno'
     'linux-firmware-pipa-adsp'
     'linux-firmware-pipa-cdsp'
     'linux-firmware-pipa-awinic'
