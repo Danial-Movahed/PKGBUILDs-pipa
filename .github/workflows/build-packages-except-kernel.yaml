@@ -48,7 +48,7 @@ jobs:
             nspr nss \
             libical bc \
             ell \
-            libx11 libxrandr glslang cmocka appstream wayland wayland-protocols python-mako libxkbcommon-x11 libxkbcommon vulkan-headers vulkan-icd-loader vulkan-tools eglexternalplatform egl-gbm egl-wayland egl-x11 glfw hicolor-icon-theme libcap libdrm mesa python -matplotlib python-numpy dbus libxnvctrl \
+            libx11 libxrandr glslang cmocka appstream wayland wayland-protocols python-mako libxkbcommon-x11 libxkbcommon vulkan-headers vulkan-icd-loader vulkan-tools eglexternalplatform egl-gbm egl-wayland egl-x11 glfw hicolor-icon-theme libcap libdrm mesa python-matplotlib python-numpy dbus libxnvctrl \
             gcc
 
       - name: Checkout
