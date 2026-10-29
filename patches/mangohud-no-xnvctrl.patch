@@ -1,0 +1,14 @@
+diff --git a/PKGBUILD b/PKGBUILD
+old mode 100644
+new mode 100755
+index 71b0d43..4118e00
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -61,6 +61,7 @@ build() {
+     arch-meson "$_pkgname" build \
+         -Dmangoapp=true \
+         -Dmangohudctl=true \
++        -Dwith_xnvctrl=disabled \
+         --wrap-mode=default
+ 
+     meson compile -C build

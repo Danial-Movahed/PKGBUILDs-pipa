@@ -15,8 +15,6 @@ on:
       - 'live-ventoy-detection/**'
       - 'mangohud-git/**'
       - 'mkbootimg-pipa/**'
-      - 'nvidia-580xx-settings/**'
-      - 'nvidia-580xx-utils/**'
       - 'pipa-kernel-hooks/**'
       - 'qbootctl/**'
       - 'swclock-offset/**'
@@ -40,7 +38,7 @@ jobs:
           pacman -Syu --noconfirm --overwrite '*'
           # Install standard packages from ALARM repos (always available)
           pacman -S --noconfirm --needed --overwrite '*' \
-            git meson ninja cmake cython \
+            git meson ninja cmake cython nodejs\
             python python-setuptools python-build python-installer python-wheel squashfs-tools \
             bluez bluez-libs bluez-utils \
             libqmi protobuf-c gobject-introspection libqrtr-glib \
@@ -48,7 +46,7 @@ jobs:
             nspr nss \
             libical bc \
             ell \
-            libx11 libxrandr glslang cmocka appstream wayland wayland-protocols python-mako libxkbcommon-x11 libxkbcommon vulkan-headers vulkan-icd-loader vulkan-tools eglexternalplatform egl-gbm egl-wayland egl-x11 glfw hicolor-icon-theme libcap libdrm mesa python-matplotlib python-numpy dbus \
+            libx11 libxrandr glslang cmocka appstream wayland wayland-protocols mako python-mako libxkbcommon-x11 libxkbcommon vulkan-headers vulkan-icd-loader vulkan-tools eglexternalplatform egl-gbm egl-wayland egl-x11 glfw hicolor-icon-theme libcap libdrm mesa python-matplotlib python-numpy dbus libgcc libglvnd libstdc++ systemd-libs yaml-cpp libxi\
             gcc
 
       - name: Checkout
@@ -66,6 +64,10 @@ jobs:
         run: |
           mv pipa-alarm/dist .
           rm -rf pipa-alarm
+
+      - name: Disable mangohud nvidia dependency
+        run: |
+          git -C "$GITHUB_WORKSPACE/mangohud-git" apply "$GITHUB_WORKSPACE/patches/mangohud-no-xnvctrl.patch"
 
       - name: Create unprivileged build user
         run: |
@@ -85,8 +87,6 @@ jobs:
             bootmac
             qbootctl
             box64
-            nvidia-580xx-utils
-            nvidia-580xx-settings
             mangohud-git
             swclock-offset
             widevine
@@ -125,8 +125,6 @@ jobs:
         run: |
           mkdir -p dist
           cd dist
-          # remove nvidia as it's not needed for pipa and it's only used in building mangohud
-          rm *nvidia*
           repo-add pipa-alarm.db.tar.zst *.pkg.tar.*
           rm -f pipa-alarm.db pipa-alarm.files
           ln -s pipa-alarm.db.tar.zst pipa-alarm.db
