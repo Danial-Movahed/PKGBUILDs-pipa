@@ -19,7 +19,6 @@ on:
       - 'qbootctl/**'
       - 'swclock-offset/**'
       - 'widevine/**'
-      - 'wine-aarch64/**'
 
 permissions:
   contents: write
@@ -90,7 +89,6 @@ jobs:
             mangohud-git
             swclock-offset
             widevine
-            wine-aarch64
             firmware-xiaomi-pipa
             mkbootimg-pipa
             pipa-kernel-hooks
